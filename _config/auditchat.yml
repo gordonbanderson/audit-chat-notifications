@@ -1,0 +1,28 @@
+---
+name: auditchatnotifier
+---
+#SilverStripe\Core\Injector\Injector:
+#  AuditLogger:
+#    class: AuditLogger
+#    factory: SilverStripe\Auditor\AuditFactory
+#  SilverStripe\ORM\ManyManyList:
+#    class: SilverStripe\Auditor\AuditHookManyManyList
+#  SilverStripe\Security\Member_GroupSet:
+#    class: SilverStripe\Auditor\AuditHookMemberGroupSet
+
+SilverStripe\Control\Controller:
+  extensions:
+    - Suilven\AuditChatNotifications\AuditChatHook
+
+SilverStripe\Security\Member:
+  extensions:
+    - Suilven\AuditChatNotifications\AuditChatHook
+
+---
+Name: auditchatcms
+Only:
+  moduleexists: silverstripe/cms
+---
+SilverStripe\CMS\Model\SiteTree:
+  extensions:
+    - Suilven\AuditChatNotifications\AuditChatHook
