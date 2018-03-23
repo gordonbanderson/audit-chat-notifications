@@ -209,27 +209,42 @@ class AuditChatHook extends DataExtension
      */
     public function authenticationFailed($data)
     {
+        error_log('AUTHENTICATION FAILED T1');
+
         // LDAP authentication uses a "Login" POST field instead of Email.
         $login = isset($data['Login'])
             ? $data['Login']
             : (isset($data[Email::class]) ? $data[Email::class] : '');
 
-        if (empty($login)) {
-            $message = (
-                'Could not determine username/email of failed authentication. '.
-                'This could be due to login form not using Email or Login field for POST data.'
-            );
-            $this->notify($message, 'auditor', 'info');
-            return;
-        }
+        $arrayData = new ArrayData([
+            'Member' => new ArrayData([
+                'Email' => $login,
+                'ID' => null
+            ])
+        ]);
 
-        $message = sprintf('Failed login attempt using email "%s"', $login);
+        $message = $arrayData->renderWith('AuthenticationFailed');
+
+        $this->notify("{$message}", 'auditor', 'info');
+    }
+
+    public function authenticationFailedUnknownUser($data)
+    {
+        error_log('AUTHENTICATION FAILED T2');
+
+        // LDAP authentication uses a "Login" POST field instead of Email.
+        $login = isset($data['Login'])
+            ? $data['Login']
+            : (isset($data[Email::class]) ? $data[Email::class] : '');
 
         $arrayData = new ArrayData([
             'Member' => new ArrayData([
-                'Email' => $login
+                'Email' => $login,
+                'ID' => null
             ])
         ]);
+
+        $message = $arrayData->renderWith('AuthenticationFailedUnknownUser');
 
         $this->notify("{$message}", 'auditor', 'info');
     }

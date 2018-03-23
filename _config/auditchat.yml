@@ -26,3 +26,6 @@ Only:
 SilverStripe\CMS\Model\SiteTree:
   extensions:
     - Suilven\AuditChatNotifications\AuditChatHook
+
+SilverStripe\Security\MemberAuthenticator\MemberAuthenticator:
+    - Suilven\AuditChatNotifications\AuditChatHook
