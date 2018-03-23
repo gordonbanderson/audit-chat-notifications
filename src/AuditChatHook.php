@@ -5,6 +5,7 @@ namespace Suilven\AuditChatNotifications;
 use SilverStripe\Control\Email\Email;
 use SilverStripe\ORM\DataExtension;
 use SilverStripe\Security\Security;
+use SilverStripe\View\ArrayData;
 use Suilven\Notifier\NotifyTrait;
 
 /**
@@ -54,25 +55,16 @@ class AuditChatHook extends DataExtension
         if (!$effectiveEditorGroups) {
             $effectiveEditorGroups = $this->owner->CanEditType;
         }
-        error_log('T5');
 
-        $message = sprintf(
-            '"%s" (ID: %s) published %s "%s" (ID: %s, Version: %s, ClassName: %s, Effective ViewerGroups: %s, '
-            . 'Effective EditorGroups: %s)',
-            $member->Email ?: $member->Title,
-            $member->ID,
-            $this->owner->singular_name(),
-            $this->owner->Title,
-            $this->owner->ID,
-            $this->owner->Version,
-            $this->owner->ClassName,
-            $effectiveViewerGroups,
-            $effectiveEditorGroups
-        );
+        $arrayData = new ArrayData([
+            'Member' => $member,
+            'Page' => $this->owner,
+            'EditorGroups' => $effectiveEditorGroups,
+            'ViewerGroups' => $effectiveViewerGroups
+        ]);
+        $message = $arrayData->renderWith('OnAfterPublish');
 
-        error_log('T6'  . $message);
-
-        $this->notify($message, 'auditor', 'info');
+        $this->notify("{$message}", 'auditor', 'info');
     }
 
     /**
@@ -80,21 +72,19 @@ class AuditChatHook extends DataExtension
      */
     public function onAfterUnpublish()
     {
+        error_log('---- on after unpublish ----');
         $member = Security::getCurrentUser();
         if (!$member || !$member->exists()) {
             return false;
         }
 
-        $message =sprintf(
-            '"%s" (ID: %s) unpublished %s "%s" (ID: %s)',
-            $member->Email ?: $member->Title,
-            $member->ID,
-            $this->owner->singular_name(),
-            $this->owner->Title,
-            $this->owner->ID
-        );
+        $arrayData = new ArrayData([
+            'Member' => $member,
+            'Page' => $this->owner
+        ]);
+        $message = $arrayData->renderWith('OnAfterUnPublish');
 
-        $this->notify($message, 'auditor', 'info');
+        $this->notify("{$message}", 'auditor', 'info');
 
     }
 
@@ -103,22 +93,19 @@ class AuditChatHook extends DataExtension
      */
     public function onAfterRevertToLive()
     {
+        error_log('---- on after revert to live ----');
         $member = Security::getCurrentUser();
         if (!$member || !$member->exists()) {
             return false;
         }
 
-        $message = sprintf(
-            '"%s" (ID: %s) reverted %s "%s" (ID: %s) to it\'s live version (#%d)',
-            $member->Email ?: $member->Title,
-            $member->ID,
-            $this->owner->singular_name(),
-            $this->owner->Title,
-            $this->owner->ID,
-            $this->owner->Version
-        );
+        $arrayData = new ArrayData([
+            'Member' => $member,
+            'Page' => $this->owner
+        ]);
+        $message = $arrayData->renderWith('OnAfterRevertToLive');
 
-        $this->notify($message, 'auditor', 'info');
+        $this->notify("{$message}", 'auditor', 'info');
 
     }
 
@@ -127,21 +114,19 @@ class AuditChatHook extends DataExtension
      */
     public function onAfterDuplicate()
     {
+        error_log('---- on after duplicate ----');
         $member = Security::getCurrentUser();
         if (!$member || !$member->exists()) {
             return false;
         }
 
-        $message = sprintf(
-            '"%s" (ID: %s) duplicated %s "%s" (ID: %s)',
-            $member->Email ?: $member->Title,
-            $member->ID,
-            $this->owner->singular_name(),
-            $this->owner->Title,
-            $this->owner->ID
-        );
+        $arrayData = new ArrayData([
+            'Member' => $member,
+            'Page' => $this->owner
+        ]);
+        $message = $arrayData->renderWith('OnAfterDuplicate');
 
-        $this->notify($message, 'auditor', 'info');
+        $this->notify("{$message}", 'auditor', 'info');
 
     }
 
@@ -150,22 +135,19 @@ class AuditChatHook extends DataExtension
      */
     public function onAfterDelete()
     {
+        error_log('---- on after delete ----');
         $member = Security::getCurrentUser();
         if (!$member || !$member->exists()) {
             return false;
         }
 
-        $message = sprintf(
-            '"%s" (ID: %s) deleted %s "%s" (ID: %s)',
-            $member->Email ?: $member->Title,
-            $member->ID,
-            $this->owner->singular_name(),
-            $this->owner->Title,
-            $this->owner->ID
-        );
+        $arrayData = new ArrayData([
+            'Member' => $member,
+            'Page' => $this->owner
+        ]);
+        $message = $arrayData->renderWith('OnAfterDelete');
 
-        $this->notify($message, 'auditor', 'info');
-
+        $this->notify("{$message}", 'auditor', 'info');
     }
 
     /**
@@ -173,6 +155,7 @@ class AuditChatHook extends DataExtension
      */
     public function onAfterRestoreToStage()
     {
+        error_log('---- on after restore to stage ----');
         $member = Security::getCurrentUser();
         if (!$member || !$member->exists()) {
             return false;
@@ -187,7 +170,13 @@ class AuditChatHook extends DataExtension
             $this->owner->ID
         );
 
-        $this->notify($message, 'auditor', 'info');
+        $arrayData = new ArrayData([
+            'Member' => $member,
+            'Page' => $this->owner
+        ]);
+        $message = $arrayData->renderWith('OnAfterRestoreToStage');
+
+        $this->notify("{$message}", 'auditor', 'info');
     }
 
     /**
@@ -195,13 +184,11 @@ class AuditChatHook extends DataExtension
      */
     public function afterMemberLoggedIn()
     {
-        $message = sprintf(
-            '"%s" (ID: %s) successfully logged in',
-            $this->owner->Email ?: $this->owner->Title,
-            $this->owner->ID
-        );
-
-        $this->notify($message, 'auditor', 'info');
+        $arrayData = new ArrayData([
+            'Member' => $this->owner
+        ]);
+        $message = $arrayData->renderWith('AfterMemberLoggedIn');
+        $this->notify("{$message}", 'auditor', 'info');
 
     }
 
@@ -210,12 +197,11 @@ class AuditChatHook extends DataExtension
      */
     public function memberAutoLoggedIn()
     {
-        $message =sprintf(
-            '"%s" (ID: %s) successfully restored autologin session',
-            $this->owner->Email ?: $this->owner->Title,
-            $this->owner->ID
-        );
-        $this->notify($message, 'auditor', 'info');
+        $arrayData = new ArrayData([
+            'Member' => $this->owner
+        ]);
+        $message = $arrayData->renderWith('AfterMemberAutoLoggedIn');
+        $this->notify("{$message}", 'auditor', 'info');
     }
 
     /**
@@ -238,8 +224,14 @@ class AuditChatHook extends DataExtension
         }
 
         $message = sprintf('Failed login attempt using email "%s"', $login);
-        $this->notify($message, 'auditor', 'info');
 
+        $arrayData = new ArrayData([
+            'Member' => new ArrayData([
+                'Email' => $login
+            ])
+        ]);
+
+        $this->notify("{$message}", 'auditor', 'info');
     }
 
     /**
@@ -281,7 +273,7 @@ class AuditChatHook extends DataExtension
             $_SERVER['REQUEST_URI']
         );
 
-        $this->notify($message, 'auditor', 'info');
+        $this->notify("{$message}", 'auditor', 'info');
     }
 
     /**
@@ -294,6 +286,13 @@ class AuditChatHook extends DataExtension
             $this->owner->Email ?: $this->owner->Title,
             $this->owner->ID
         );
-        $this->notify($message, 'auditor', 'info');
+        $this->notify("{$message}", 'auditor', 'info');
+
+        $arrayData = new ArrayData([
+            'Member' => $this->owner
+        ]);
+        $message = $arrayData->renderWith('AfterMemberLoggedOut');
+        $this->notify("{$message}", 'auditor', 'info');
+
     }
 }
