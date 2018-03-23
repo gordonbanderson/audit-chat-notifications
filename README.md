@@ -7,8 +7,6 @@
 [![Quality Score][ico-code-quality]][link-code-quality]
 [![Total Downloads][ico-downloads]][link-downloads]
 
-**Note:** Replace ```Gordon Anderson``` ```gordonbanderson``` ```https://github.com/gordonbanderson``` ```gordon.b.anderson@gmail.com``` ```suilven``` ```audit-chat-notifications``` ```Send Audit Logging notifications to chat channels, currently Slack``` with their correct values in [README.md](README.md), [CHANGELOG.md](CHANGELOG.md), [CONTRIBUTING.md](CONTRIBUTING.md), [LICENSE.md](LICENSE.md) and [composer.json](composer.json) files, then delete this line. You can run `$ php prefill.php` in the command line to make all replacements at once. Delete the file prefill.php as well.
-
 This is where your description should go. Try and limit it to a paragraph or two, and maybe throw in a mention of what
 PSRs you support to avoid any confusion with users and contributors.
 
@@ -35,20 +33,12 @@ $ composer require suilven/audit-chat-notifications
 
 ## Usage
 
-``` php
-$skeleton = new Suilven\AuditChatNofications();
-echo $skeleton->echoPhrase('Hello, League!');
-```
+The package is auto configured to send notifications to a default or auditor channel, provided you
+have set up the notifier correctly.
 
 ## Change log
 
 Please see [CHANGELOG](CHANGELOG.md) for more information on what has changed recently.
-
-## Testing
-
-``` bash
-$ composer test
-```
 
 ## Contributing
 
